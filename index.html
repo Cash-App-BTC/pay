@@ -5,83 +5,130 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Cash App Pay</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- QR Code Styling Library -->
+  <!-- Verified QR Code Styling library -->
   <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    :root {
+      /* Light Mode: Signature Cash App Vibrant Green */
+      --bg-color: #00D632;
+      --text-main: #FFFFFF;
+      --text-muted: rgba(255, 255, 255, 0.85);
+      --badge-bg: rgba(0, 0, 0, 0.12);
+      --badge-border: rgba(255, 255, 255, 0.2);
+      --key-hover: rgba(0, 0, 0, 0.08);
+      --key-active: rgba(0, 0, 0, 0.15);
+      --btn-bg: #FFFFFF;
+      --btn-text: #00D632;
+      --btn-hover: #F2F2F2;
+      --btn-shadow: rgba(0, 0, 0, 0.15);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      /* Dark Mode: Pitch Black & Cash App Neon Accents */
+      :root {
+        --bg-color: #000000;
+        --text-main: #00D632;
+        --text-muted: #A3A3A3;
+        --badge-bg: #171717;
+        --badge-border: #262626;
+        --key-hover: #171717;
+        --key-active: #262626;
+        --btn-bg: #00D632;
+        --btn-text: #000000;
+        --btn-hover: #00BA2B;
+        --btn-shadow: rgba(0, 214, 50, 0.25);
+      }
+    }
+
     body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
   </style>
 </head>
-<body class="bg-black text-white flex flex-col justify-between min-h-screen max-w-md mx-auto select-none p-5">
+<body class="flex flex-col justify-between min-h-screen max-w-md mx-auto select-none p-5">
 
-  <!-- Top Bar -->
+  <!-- Header / Live Rate Bar -->
   <div class="flex justify-between items-center pt-2">
-    <div class="flex items-center space-x-2 bg-neutral-900 border border-neutral-800 px-3.5 py-1.5 rounded-full">
-      <span class="w-2.5 h-2.5 bg-[#00D632] rounded-full animate-pulse"></span>
-      <span class="text-xs font-semibold text-neutral-200">Cash App Pay</span>
+    <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full backdrop-blur-md" 
+         style="background-color: var(--badge-bg); border: 1px solid var(--badge-border);">
+      <span class="w-2.5 h-2.5 rounded-full animate-pulse bg-white dark:bg-[#00D632]"></span>
+      <span class="text-xs font-bold tracking-wide" style="color: var(--text-muted)">Cash App Pay</span>
     </div>
-    <div class="text-xs font-mono text-neutral-400 bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-full">
+    
+    <div class="text-xs font-mono font-semibold px-3.5 py-1.5 rounded-full backdrop-blur-md" 
+         style="background-color: var(--badge-bg); border: 1px solid var(--badge-border); color: var(--text-muted);">
       <span id="liveRate">Loading rate...</span>
     </div>
   </div>
 
   <!-- Keypad Display -->
   <div class="flex flex-col items-center justify-center my-auto py-6">
-    <div class="flex items-baseline justify-center font-extrabold text-[#00D632] tracking-tight">
+    <div class="flex items-baseline justify-center font-black tracking-tight" style="color: var(--text-main);">
       <span class="text-4xl sm:text-5xl mr-1 font-bold">$</span>
-      <span id="displayAmount" class="text-6xl sm:text-7xl">0</span>
+      <span id="displayAmount" class="text-6xl sm:text-7xl font-extrabold">0</span>
     </div>
-    <div class="mt-3 flex items-center space-x-1.5 bg-neutral-900/90 border border-neutral-800 px-4 py-1.5 rounded-full">
-      <span class="text-amber-400 text-sm font-bold">₿</span>
-      <span id="btcAmount" class="text-neutral-300 font-mono text-sm">0.00000000</span>
+    
+    <!-- Satoshi Conversion Badge -->
+    <div class="mt-3 flex items-center space-x-1.5 px-4 py-1.5 rounded-full shadow-sm backdrop-blur-md" 
+         style="background-color: var(--badge-bg); border: 1px solid var(--badge-border);">
+      <span class="text-amber-300 dark:text-amber-400 text-sm font-bold">₿</span>
+      <span id="btcAmount" class="font-mono text-sm font-semibold" style="color: var(--text-muted);">0.00000000</span>
     </div>
   </div>
 
-  <!-- Keypad & Submit Area -->
+  <!-- Keypad Section -->
   <div class="w-full">
-    <div class="grid grid-cols-3 gap-y-3 gap-x-6 text-center text-2xl font-bold mb-5">
-      <button onclick="pressKey('1')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">1</button>
-      <button onclick="pressKey('2')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">2</button>
-      <button onclick="pressKey('3')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">3</button>
-      <button onclick="pressKey('4')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">4</button>
-      <button onclick="pressKey('5')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">5</button>
-      <button onclick="pressKey('6')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">6</button>
-      <button onclick="pressKey('7')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">7</button>
-      <button onclick="pressKey('8')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">8</button>
-      <button onclick="pressKey('9')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">9</button>
-      <button onclick="pressKey('.')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">.</button>
-      <button onclick="pressKey('0')" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl transition">0</button>
-      <button onclick="deleteKey()" class="py-3.5 hover:bg-neutral-900 active:bg-neutral-800 rounded-2xl flex items-center justify-center transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="grid grid-cols-3 gap-y-2 gap-x-6 text-center text-3xl font-extrabold mb-5" style="color: var(--text-main);">
+      <button onclick="pressKey('1')" class="py-3.5 rounded-2xl transition" style="--tw-bg-opacity: 1;" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">1</button>
+      <button onclick="pressKey('2')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">2</button>
+      <button onclick="pressKey('3')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">3</button>
+      <button onclick="pressKey('4')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">4</button>
+      <button onclick="pressKey('5')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">5</button>
+      <button onclick="pressKey('6')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">6</button>
+      <button onclick="pressKey('7')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">7</button>
+      <button onclick="pressKey('8')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">8</button>
+      <button onclick="pressKey('9')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">9</button>
+      <button onclick="pressKey('.')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">.</button>
+      <button onclick="pressKey('0')" class="py-3.5 rounded-2xl transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">0</button>
+      <button onclick="deleteKey()" class="py-3.5 rounded-2xl flex items-center justify-center transition" onmouseover="this.style.backgroundColor='var(--key-hover)'" onmouseout="this.style.backgroundColor='transparent'">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
         </svg>
       </button>
     </div>
 
-    <!-- Action Button -->
+    <!-- Submit Pay Button -->
     <button 
+      id="payBtn"
       onclick="handlePaymentTrigger()" 
-      class="w-full bg-[#00D632] hover:bg-[#00ba2b] active:scale-[0.98] text-black font-extrabold text-lg py-4 rounded-full transition shadow-lg shadow-green-500/20"
+      class="w-full font-black text-lg py-4 rounded-full transition shadow-lg active:scale-[0.98]"
+      style="background-color: var(--btn-bg); color: var(--btn-text); box-shadow: 0 10px 25px var(--btn-shadow);"
     >
       Pay
     </button>
   </div>
 
-  <!-- QR Desktop / Fallback Modal -->
-  <div id="qrModal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 z-50">
+  <!-- QR Desktop / Fallback Card Modal -->
+  <div id="qrModal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 z-50 overflow-y-auto">
     <div class="bg-white text-black w-full max-w-[340px] rounded-[36px] p-6 shadow-2xl relative text-center">
+      
       <div class="text-left mb-3">
         <h2 id="cardDisplayName" class="text-2xl font-extrabold text-neutral-900 tracking-tight leading-tight">Eric jason</h2>
         <p id="cardCashtag" class="text-sm font-semibold text-neutral-500">$Ericjason7</p>
       </div>
 
+      <!-- Rounded Cash App QR Matrix -->
       <div class="relative flex justify-center items-center my-2 bg-white rounded-2xl">
         <div id="qrCanvasContainer" class="flex justify-center items-center min-h-[260px] min-w-[260px]"></div>
       </div>
 
+      <!-- Payment Breakdown -->
       <div class="mt-3 pt-3 border-t border-neutral-100 text-left space-y-1.5">
         <div class="flex justify-between items-center text-xs">
           <span class="text-neutral-500 font-medium">Amount Due:</span>
@@ -106,8 +153,8 @@
 
   <script>
     const BTC_ADDRESS = "144riwNanTYo6V3PpznqhUnmqFZtkJKSt8";
-    const DISPLAY_NAME = "Celine Alve";
-    const CASHTAG = "CelineAlve217"; // Without $ symbol for web URL
+    const DISPLAY_NAME = "Celine Alva";
+    const CASHTAG = "Celinealva447";
 
     const CASHAPP_SVG_ICON = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -191,15 +238,12 @@
       const satoshis = (val / btcRate).toFixed(8);
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-      // Deep link URI for installed Cash App
       const cashAppDeepLink = `cashapp://bitcoin?address=${BTC_ADDRESS}&amount=${satoshis}`;
-      // Direct Web URL fallback for Cash App
       const cashAppWebUrl = `https://cash.app/$${CASHTAG}/${val}`;
 
       if (isMobile) {
         let appOpened = false;
 
-        // Listener to detect if browser moves to background (means app successfully opened)
         const visibilityHandler = () => {
           if (document.hidden || document.webkitHidden) {
             appOpened = true;
@@ -208,10 +252,8 @@
         document.addEventListener("visibilitychange", visibilityHandler);
         document.addEventListener("webkitvisibilitychange", visibilityHandler);
 
-        // 1. Attempt to open Cash App
         window.location.href = cashAppDeepLink;
 
-        // 2. If app didn't open after 1.5 seconds, redirect to Cash App Web
         setTimeout(() => {
           document.removeEventListener("visibilitychange", visibilityHandler);
           document.removeEventListener("webkitvisibilitychange", visibilityHandler);
@@ -222,7 +264,6 @@
         }, 1500);
 
       } else {
-        // Desktop View: Display Cash App QR Modal
         const standardBitcoinUri = `bitcoin:${BTC_ADDRESS}?amount=${satoshis}`;
         renderCashAppQR(standardBitcoinUri);
         document.getElementById("modalBtc").innerText = `${satoshis} BTC ($${rawAmount})`;
